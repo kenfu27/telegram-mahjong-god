@@ -57,7 +57,7 @@ def send_seat_select_keyboard(bot, game_id, text, parse_mode=None, message=None)
 
 
 def send_player_select_keyboard(bot, game_id, event_id, action, chat_id, text, parse_mode=None, exclude_id=None,
-                                message=None):
+                                reply_to_message_id=None, message=None):
     """
     :type bot: telegram.bot.Bot
     :type game_id: int
@@ -67,6 +67,7 @@ def send_player_select_keyboard(bot, game_id, event_id, action, chat_id, text, p
     :type text: str | unicode
     :type parse_mode: str
     :type exclude_id: str | unicode | set | list
+    :type reply_to_message_id: int
     :type message: telegram.message.Message
     """
 
@@ -108,12 +109,14 @@ def send_player_select_keyboard(bot, game_id, event_id, action, chat_id, text, p
                             chat_id=message.chat_id,
                             message_id=message.message_id,
                             parse_mode=parse_mode,
+                            reply_to_message_id=reply_to_message_id,
                             reply_markup=InlineKeyboardMarkup(inline_keyboard_buttons))
     else:
         # Send New Keyboard
         bot.send_message(chat_id=chat_id,
                          text=text,
                          parse_mode=parse_mode,
+                         reply_to_message_id=reply_to_message_id,
                          reply_markup=InlineKeyboardMarkup(inline_keyboard_buttons))
 
 

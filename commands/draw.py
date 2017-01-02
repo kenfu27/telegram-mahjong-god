@@ -31,6 +31,7 @@ def draw(bot, update):
                             game_id=game.id,
                             message_id=update.message.message_id,
                             type=EventType.DRAW,
+                            created_by=user.username,
                             completed=1)
 
             # Send Message to Chat Room

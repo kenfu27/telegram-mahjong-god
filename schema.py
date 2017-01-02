@@ -114,9 +114,11 @@ class Event(Timestamps, Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     type = Column(String(50))
     description = Column(UnicodeText, nullable=True)
+    created_by = Column(String(64), ForeignKey('player.username'))
     completed = Column(Integer, default=0)
 
     # Relationship
+    game = relationship('Game')
     transactions = relationship('Transaction')
 
 

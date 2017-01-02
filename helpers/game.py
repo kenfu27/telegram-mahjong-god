@@ -54,25 +54,7 @@ def advance_game_status(bot, game_id, winner=None):
                                 joinedload(Game.player_3),
                                 joinedload(Game.player_4)])
 
-    if winner:
-        jong_id = game.__getattribute__('player_{0}_id'.format(game.round_no))
-        if jong_id in winner:
-            # Same Jong
-            jong = game.__getattribute__('player_{0}'.format(game.round_no))
-            text = String.SAME_JONG_MESSAGE.format(
-                set=String.__dict__.get('SEAT_{0}'.format(game.set_no)),
-                round=String.__dict__.get('SEAT_{0}'.format(game.round_no)),
-                jong_first=jong.first_name,
-                jong_last=jong.last_name
-            )
-
-            # Send Message To Chat
-            bot.sendMessage(chat_id=game.chat_id, text=text, parse_mode='Markdown')
-        elif game.set_no == 4 and game.round_no == 4:
-            # End Game
-            end_game(bot, game.id)
-    else:
-        # Next Jong
+    def next_jong():
         if game.round_no == 4:
             if game.set_no == 4:
                 # Same Jong
@@ -102,6 +84,40 @@ def advance_game_status(bot, game_id, winner=None):
                 jong_first=jong.first_name,
                 jong_last=jong.last_name
             )
+
+        return text
+
+    def same_jong():
+        jong = game.__getattribute__('player_{0}'.format(game.round_no))
+        text = String.SAME_JONG_MESSAGE.format(
+            set=String.__dict__.get('SEAT_{0}'.format(game.set_no)),
+            round=String.__dict__.get('SEAT_{0}'.format(game.round_no)),
+            jong_first=jong.first_name,
+            jong_last=jong.last_name
+        )
+
+        return text
+
+    if winner:
+        jong_id = game.__getattribute__('player_{0}_id'.format(game.round_no))
+        if jong_id in winner:
+            # Same Jong
+            text = same_jong()
+
+            # Send Message To Chat
+            bot.sendMessage(chat_id=game.chat_id, text=text, parse_mode='Markdown')
+        elif game.set_no == 4 and game.round_no == 4:
+            # End Game
+            end_game(bot, game.id)
+        else:
+            # Next Jong
+            text = next_jong()
+
+            # Send Message To Chat
+            bot.sendMessage(chat_id=game.chat_id, text=text, parse_mode='Markdown')
+    else:
+        # Next Jong
+        text = next_jong()
 
         # Send Message To Chat
         bot.sendMessage(chat_id=game.chat_id, text=text, parse_mode='Markdown')

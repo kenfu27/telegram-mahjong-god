@@ -55,16 +55,10 @@ def event_cancel(bot, update):
     event = DB.get_event(session, event_id=event_id)
 
     if event:
-        game = DB.get_game(session, event.game_id)
-
         DB.delete_event(session, event_id)
-
         text = u'{0} {1}: {2}'.format(user.first_name, user.last_name, String.CANCEL)
-
-        bot.send_message(chat_id=game.chat_id, text=text, reply_to_message_id=event.message_id)
-
         message = update.callback_query.message
-        bot.editMessageText(text=String.CANCEL_CONFIRM, chat_id=message.chat_id, message_id=message.message_id)
+        bot.editMessageText(text=text, chat_id=message.chat_id, message_id=message.message_id)
 
 
 __all__ = []

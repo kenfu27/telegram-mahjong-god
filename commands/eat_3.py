@@ -26,17 +26,18 @@ def _3eat(bot, update):
     game = DB.get_player_current_game(session, user, status=GameStatus.STARTED)
 
     if game:
-        current_user = DB.get_player(session, user.username)
         event = DB.create_event(session,
                                 game_id=game.id,
                                 message_id=update.message.message_id,
-                                type=EventType.EAT_3)
+                                type=EventType.EAT_3,
+                                created_by=user.username)
 
         send_player_select_keyboard(bot=bot,
                                     game_id=game.id,
                                     event_id=event.id,
                                     action=String.ACTION_3_SELECT_TARGET,
-                                    chat_id=current_user.chat_id,
+                                    chat_id=game.chat_id,
+                                    reply_to_message_id=event.message_id,
                                     text=String.EAT_3_ASK_TARGET)
 
 
@@ -46,12 +47,13 @@ def eat_3_target(bot, update):
     :type bot: telegram.bot.Bot
     :type update: telegram.update.Update
     """
+    current_user = update.callback_query.from_user
     data = json.loads(update.callback_query.data)
     session = get_db_session()
     event_id = data['e']
     event = DB.get_event(session, event_id=event_id)
 
-    if event and not event.completed:
+    if event and not event.completed and current_user.username == event.created_by:
         target_id = data['t']
         update_dict = json.loads(event.description)
         update_dict['loser'] = target_id
@@ -127,15 +129,15 @@ def handle_eat_3_select_fan_callback(bot, update, index):
     :type update: telegram.update.Update
     :type index: int
     """
+    current_user = update.callback_query.from_user
     data = json.loads(update.callback_query.data)
     session = get_db_session()
     event_id = data['e']
     event = DB.get_event(session, event_id=event_id)
-    game = DB.get_game(session, event.game_id)
 
-    if event and not event.completed:
+    if event and not event.completed and current_user.username == event.created_by:
         fan = data['f']
-        amount = PRICE_LIST.get(game.price).get(int(fan))
+        amount = PRICE_LIST.get(event.game.price).get(int(fan))
         update_dict = json.loads(event.description)
         update_dict['fan_{0}'.format(index)] = int(fan)
         update_dict['amount_{0}'.format(index)] = amount
@@ -167,12 +169,6 @@ def handle_eat_3_select_fan_callback(bot, update, index):
                                   fan_no=update_dict['fan_3'],
                                   amount=update_dict['amount_3'])
 
-            # Update Message in Individual Chat
-            message = update.callback_query.message
-            bot.editMessageText(text=String.EAT_CONFIRM,
-                                chat_id=message.chat_id,
-                                message_id=message.message_id)
-
             # Send Message to Group
             game = DB.get_game(session, event.game_id)
             loser = DB.get_player(session, update_dict['loser'])
@@ -194,7 +190,10 @@ def handle_eat_3_select_fan_callback(bot, update, index):
                 fan_3=update_dict['fan_3']
             )
 
-            bot.send_message(chat_id=game.chat_id, text=text)
+            message = update.callback_query.message
+            bot.editMessageText(text=text,
+                                chat_id=message.chat_id,
+                                message_id=message.message_id)
 
             # Advance Game
             advance_game_status(bot, game_id=game.id,

@@ -29,8 +29,10 @@ class String(object):
     ACTION_SELECT_SEAT = 'select_seat'
     ACTION_START_GAME = 'start_game'
     ACTION_EVENT_CANCEL = 'event_cancel'
-    ACTION_EAT_SELECT_TARGET = 'eat_target'
+    ACTION_EAT_SELECT_WINNER = 'eat_winner'
+    ACTION_EAT_SELECT_LOSER = 'eat_loser'
     ACTION_EAT_SELECT_FAN = 'eat_fan'
+    ACTION_SELF_TOUCH_SELECT_WINNER = 'self_touch_winner'
     ACTION_SELF_TOUCH_SELECT_FAN = 'self_touch_fan'
     ACTION_2_EAT_SELECT_WIN_1 = '2_eat_win_1'
     ACTION_2_EAT_SELECT_FAN_1 = '2_eat_fan_1'
@@ -71,7 +73,8 @@ class String(object):
     END_GAME_MESSAGE = u'打撚完！'
 
     # Eat
-    EAT_ASK_TARGET = u'威喇威喇 食邊個傻閪啊?'
+    EAT_ASK_WINNER = u'邊個食糊？'
+    EAT_ASK_LOSER = u'威喇威喇 食邊個傻閪啊?'
     EAT_ASK_PRICE = u'勁勁勁 食幾大啊?'
     EAT_CONFIRM = u'數已入'
     EAT_MESSAGES = [
@@ -80,6 +83,8 @@ class String(object):
     ]
 
     # Self Touch
+    SELF_TOUCH_ASK_WINNER = u'邊個仆街自摸？'
+    SELF_TOUCH_ASK_PRICE = u'自摸幾多番？'
     SELF_TOUCH_MESSAGES = [
         u'{winner_first} {winner_last} 自摸{fan}番！ 位位{amount}蚊！',
         u'{winner_first} {winner_last} 又屎忽撞騰棍自摸{fan}番喇'

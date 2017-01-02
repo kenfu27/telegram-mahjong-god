@@ -24,17 +24,18 @@ def eat_2(bot, update):
     game = DB.get_player_current_game(session, user, status=GameStatus.STARTED)
 
     if game:
-        current_user = DB.get_player(session, user.username)
         event = DB.create_event(session,
                                 game_id=game.id,
                                 message_id=update.message.message_id,
-                                type=EventType.EAT_2)
+                                type=EventType.EAT_2,
+                                created_by=user.username)
 
         send_player_select_keyboard(bot=bot,
                                     game_id=game.id,
                                     event_id=event.id,
                                     action=String.ACTION_2_EAT_SELECT_WIN_1,
-                                    chat_id=current_user.chat_id,
+                                    chat_id=game.chat_id,
+                                    reply_to_message_id=event.message_id,
                                     text=String.EAT_2_ASK_WINNER_1)
 
 
@@ -44,12 +45,13 @@ def eat_2_winner_1(bot, update):
     :type bot: telegram.bot.Bot
     :type update: telegram.update.Update
     """
+    current_user = update.callback_query.from_user
     data = json.loads(update.callback_query.data)
     session = get_db_session()
     event_id = data['e']
     event = DB.get_event(session, event_id=event_id)
 
-    if event:
+    if event and not event.completed and current_user.username == event.created_by:
         target_id = data['t']
         update_dict = json.loads(event.description)
         update_dict['winner_1'] = target_id
@@ -73,22 +75,22 @@ def eat_2_fan_1(bot, update):
     :type bot: telegram.bot.Bot
     :type update: telegram.update.Update
     """
+    current_user = update.callback_query.from_user
     data = json.loads(update.callback_query.data)
-    event_id = data['e']
     session = get_db_session()
+    event_id = data['e']
     event = DB.get_event(session, event_id=event_id)
-    game = DB.get_game(session, event.game_id)
 
-    if event and not event.completed:
+    if event and not event.completed and current_user.username == event.created_by:
         fan = data['f']
-        amount = PRICE_LIST.get(game.price).get(int(fan))
+        amount = PRICE_LIST.get(event.game.price).get(int(fan))
         update_dict = json.loads(event.description)
         update_dict['fan_1'] = int(fan)
         update_dict['amount_1'] = amount
         DB.update_event(session, event_id, {'description': json.dumps(update_dict)})
 
         send_player_select_keyboard(bot=bot,
-                                    game_id=game.id,
+                                    game_id=event.game_id,
                                     event_id=event.id,
                                     action=String.ACTION_2_EAT_SELECT_WIN_2,
                                     chat_id=update.callback_query.message.chat_id,
@@ -103,15 +105,13 @@ def eat_2_win_2(bot, update):
     :type bot: telegram.bot.Bot
     :type update: telegram.update.Update
     """
+    current_user = update.callback_query.from_user
     data = json.loads(update.callback_query.data)
-
-    event_id = data['e']
-
     session = get_db_session()
-
+    event_id = data['e']
     event = DB.get_event(session, event_id=event_id)
 
-    if event:
+    if event and not event.completed and current_user.username == event.created_by:
         target_id = data['t']
         update_dict = json.loads(event.description)
         update_dict['winner_2'] = target_id
@@ -135,22 +135,22 @@ def eat_2_fan_2(bot, update):
     :type bot: telegram.bot.Bot
     :type update: telegram.update.Update
     """
+    current_user = update.callback_query.from_user
     data = json.loads(update.callback_query.data)
-    event_id = data['e']
     session = get_db_session()
+    event_id = data['e']
     event = DB.get_event(session, event_id=event_id)
-    game = DB.get_game(session, event.game_id)
 
-    if event and not event.completed:
+    if event and not event.completed and current_user.username == event.created_by:
         fan = data['f']
-        amount = PRICE_LIST.get(game.price).get(int(fan))
+        amount = PRICE_LIST.get(event.game.price).get(int(fan))
         update_dict = json.loads(event.description)
         update_dict['fan_2'] = int(fan)
         update_dict['amount_2'] = amount
         DB.update_event(session, event_id, {'description': json.dumps(update_dict)})
 
         send_player_select_keyboard(bot=bot,
-                                    game_id=game.id,
+                                    game_id=event.game_id,
                                     event_id=event.id,
                                     action=String.ACTION_2_EAT_SELECT_TARGET,
                                     chat_id=update.callback_query.message.chat_id,
@@ -165,15 +165,16 @@ def eat_2_target(bot, update):
     :type bot: telegram.bot.Bot
     :type update: telegram.update.Update
     """
+    current_user = update.callback_query.from_user
     data = json.loads(update.callback_query.data)
     session = get_db_session()
     event_id = data['e']
     event = DB.get_event(session, event_id=event_id)
 
-    if event:
+    if event and not event.completed and current_user.username == event.created_by:
         target_id = data['t']
         update_dict = json.loads(event.description)
-        update_dict['t'] = target_id
+        update_dict['loser'] = target_id
         DB.update_event(session, event_id, {'description': json.dumps(update_dict), 'completed': 1})
 
         # Create Transaction
@@ -188,14 +189,7 @@ def eat_2_target(bot, update):
                               fan_no=update_dict['fan_2'],
                               amount=update_dict['amount_2'])
 
-        # Update Message in Individual Chat
-        message = update.callback_query.message
-        bot.editMessageText(text=String.EAT_CONFIRM,
-                            chat_id=message.chat_id,
-                            message_id=message.message_id)
-
         # Send Message to Group
-        game = DB.get_game(session, event.game_id)
         win_player_1 = DB.get_player(session, update_dict['winner_1'])
         win_player_2 = DB.get_player(session, update_dict['winner_2'])
         target_player = DB.get_player(session, update_dict['loser'])
@@ -211,7 +205,10 @@ def eat_2_target(bot, update):
             fan_2=update_dict['fan_2']
         )
 
-        bot.send_message(chat_id=game.chat_id, text=text)
+        message = update.callback_query.message
+        bot.editMessageText(text=text,
+                            chat_id=message.chat_id,
+                            message_id=message.message_id)
 
         # Advance Game
-        advance_game_status(bot, game_id=game.id, winner=[update_dict['winner_1'], update_dict['winner_2']])
+        advance_game_status(bot, game_id=event.game_id, winner=[update_dict['winner_1'], update_dict['winner_2']])

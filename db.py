@@ -116,8 +116,13 @@ class DB(object):
 
     # Event
     @staticmethod
-    def create_event(session, game_id, message_id, type, description='{}', completed=0):
-        event = Event(game_id=game_id, message_id=message_id, type=type, description=description, completed=completed)
+    def create_event(session, game_id, message_id, type, created_by, description='{}', completed=0):
+        event = Event(game_id=game_id,
+                      message_id=message_id,
+                      type=type,
+                      description=description,
+                      created_by=created_by,
+                      completed=completed)
 
         session.add(event)
         session.commit()
