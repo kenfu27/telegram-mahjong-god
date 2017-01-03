@@ -24,7 +24,6 @@ RUN apt-get update
 RUN ["bash", "-c", "debconf-set-selections <<< 'mysql-community-server mysql-community-server/root-pass password root'"]
 RUN ["bash", "-c", "debconf-set-selections <<< 'mysql-community-server mysql-community-server/re-root-pass password root'"]
 RUN apt-get install -y mysql-community-server
-RUN mysql -uroot --password=root -e 'CREATE DATABASE mahjong;'
 
 # Default command
 CMD service mysql restart && bash
