@@ -2,8 +2,8 @@
 
 import codecs
 import json
-
 import time
+
 from sqlalchemy.orm import joinedload
 
 from db import DB, get_db_session
@@ -67,7 +67,7 @@ def get_game_status(game_id):
 
     totals = [0, 0, 0, 0]
     for index, event in enumerate(game.events):
-        if event.type != EventType.END:
+        if event.type not in [EventType.END, EventType.DELETE]:
             results = [0, 0, 0, 0]
             for transaction in event.transactions:
                 totals[seat_no_map[transaction.from_player_id]] -= int(transaction.amount)
