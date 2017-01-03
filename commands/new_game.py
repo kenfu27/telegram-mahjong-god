@@ -147,7 +147,7 @@ def start_game(bot, update):
 
     if game:
         if get_game_player_no(game) == 4:
-            update_dict = {'status': GameStatus.STARTED}
+            update_dict = {'status': GameStatus.STARTED, 'set_no': 1, 'round_no': 1}
             DB.update_game(session, game.id, update_dict)
 
             with codecs.open('templates/game_start.html', 'r', 'utf-8') as f:
@@ -160,5 +160,3 @@ def start_game(bot, update):
 
         bot.editMessageText(text=html, chat_id=game.chat_id, message_id=update.callback_query.message.message_id,
                             parse_mode='HTML', reply_markup=None)
-
-

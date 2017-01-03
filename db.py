@@ -110,6 +110,29 @@ class DB(object):
         return query.get(game_id)
 
     @staticmethod
+    def get_games(session, chat_id, size=10, game_before_id=None, game_after_id=None, options=None):
+        """
+        :type session:
+        :type chat_id: int
+        :type size: int
+        :type game_before_id: int
+        :type game_after_id: int
+        :type options:
+        :rtype: list[schema.Game]
+        """
+        query = session.query(Game).filter(Game.chat_id == chat_id)
+
+        if options:
+            query = query.options(options)
+
+        if game_before_id:
+            return query.filter(Game.id < game_before_id).order_by(Game.id.desc()).limit(size).all()
+        elif game_after_id:
+            return list(reversed(query.filter(Game.id > game_before_id).order_by(Game.id.asc()).limit(size).all()))
+        else:
+            return query.order_by(Game.id.desc()).limit(size).all()
+
+    @staticmethod
     def update_game(session, game_id, update_dict):
         session.query(Game).filter(Game.id == game_id).update(update_dict)
         session.commit()

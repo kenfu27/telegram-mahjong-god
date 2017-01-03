@@ -94,6 +94,7 @@ class Game(Timestamps, Base):
     player_2 = relationship('Player', foreign_keys=player_2_id)
     player_3 = relationship('Player', foreign_keys=player_3_id)
     player_4 = relationship('Player', foreign_keys=player_4_id)
+    events = relationship('Event')
 
 
 class EventType(object):
@@ -103,6 +104,7 @@ class EventType(object):
     SELF_TOUCH = 'self_touch'
     DRAW = 'draw'
     ON_9 = 'on9'
+    END = 'end'
 
 
 class Event(Timestamps, Base):

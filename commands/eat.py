@@ -126,7 +126,7 @@ def eat_fan(bot, update):
 
     if event and not event.completed and current_user.username == event.created_by:
         fan = data['f']
-        amount = PRICE_LIST.get(game.price).get(int(fan))
+        amount = PRICE_LIST.get(event.game.price).get(int(fan))
 
         update_dict = json.loads(event.description)
         update_dict['fan'] = int(fan)

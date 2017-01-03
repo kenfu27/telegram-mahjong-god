@@ -1,5 +1,6 @@
 import json
 
+import datetime
 from sqlalchemy.orm import joinedload
 from telegram import InlineKeyboardButton
 from telegram import InlineKeyboardMarkup
@@ -9,7 +10,7 @@ from schema import Game, PRICE_LIST
 from strings import String
 
 
-def send_seat_select_keyboard(bot, game_id, text, parse_mode=None, message=None):
+def send_seat_select_keyboard(bot, game_id, text, parse_mode=None, message=None, disable_notification=True):
     """
     :type bot: telegram.bot.Bot
     :type game_id: int
@@ -47,17 +48,19 @@ def send_seat_select_keyboard(bot, game_id, text, parse_mode=None, message=None)
                             chat_id=message.chat_id,
                             message_id=message.message_id,
                             parse_mode=parse_mode,
-                            reply_markup=InlineKeyboardMarkup(inline_keyboard_buttons))
+                            reply_markup=InlineKeyboardMarkup(inline_keyboard_buttons),
+                            disable_notification=disable_notification)
     else:
         # Send New Keyboard
         bot.send_message(text=text,
                          chat_id=game.chat_id,
                          parse_mode=parse_mode,
-                         reply_markup=InlineKeyboardMarkup(inline_keyboard_buttons))
+                         reply_markup=InlineKeyboardMarkup(inline_keyboard_buttons),
+                         disable_notification=disable_notification)
 
 
 def send_player_select_keyboard(bot, game_id, event_id, action, chat_id, text, parse_mode=None, exclude_id=None,
-                                reply_to_message_id=None, message=None):
+                                reply_to_message_id=None, message=None, disable_notification=True):
     """
     :type bot: telegram.bot.Bot
     :type game_id: int
@@ -92,8 +95,7 @@ def send_player_select_keyboard(bot, game_id, event_id, action, chat_id, text, p
         if player and player.username not in exclude_id:
             btn_text = u'{0} {1}'.format(player.first_name, player.last_name)
 
-            callback_data = json.dumps(
-                {'a': action, 'e': event_id, 't': player.username})
+            callback_data = json.dumps({'a': action, 'e': event_id, 't': player.username})
 
             inline_keyboard_buttons.append([
                 InlineKeyboardButton(text=btn_text, callback_data=callback_data)
@@ -110,17 +112,20 @@ def send_player_select_keyboard(bot, game_id, event_id, action, chat_id, text, p
                             message_id=message.message_id,
                             parse_mode=parse_mode,
                             reply_to_message_id=reply_to_message_id,
-                            reply_markup=InlineKeyboardMarkup(inline_keyboard_buttons))
+                            reply_markup=InlineKeyboardMarkup(inline_keyboard_buttons),
+                            disable_notification=disable_notification)
     else:
         # Send New Keyboard
         bot.send_message(chat_id=chat_id,
                          text=text,
                          parse_mode=parse_mode,
                          reply_to_message_id=reply_to_message_id,
-                         reply_markup=InlineKeyboardMarkup(inline_keyboard_buttons))
+                         reply_markup=InlineKeyboardMarkup(inline_keyboard_buttons),
+                         disable_notification=disable_notification)
 
 
-def send_fan_select_keyboard(bot, game_id, event_id, action, chat_id, text, parse_mode=None, message=None):
+def send_fan_select_keyboard(bot, game_id, event_id, action, chat_id, text, parse_mode=None, message=None,
+                             disable_notification=True):
     """
     
     :type bot: telegram.bot.Bot
@@ -158,10 +163,57 @@ def send_fan_select_keyboard(bot, game_id, event_id, action, chat_id, text, pars
         bot.editMessageText(text=text,
                             chat_id=message.chat_id,
                             message_id=message.message_id,
-                            reply_markup=InlineKeyboardMarkup(inline_keyboard_buttons))
+                            reply_markup=InlineKeyboardMarkup(inline_keyboard_buttons),
+                            disable_notification=disable_notification)
     else:
         # Send New Keyboard
         bot.send_message(chat_id=chat_id,
                          text=text,
                          parse_mode=parse_mode,
-                         reply_markup=InlineKeyboardMarkup(inline_keyboard_buttons))
+                         reply_markup=InlineKeyboardMarkup(inline_keyboard_buttons),
+                         disable_notification=disable_notification)
+
+
+def send_game_select_keyboard(bot, chat_id, text, action, games, message=None, disable_notification=False):
+    """
+    :type bot: telegram.bot.Bot
+    :type chat_id: int
+    :type text:
+    :type action: str
+    :type games: list[schema.Game]
+    """
+    inline_keyboard_buttons = []
+
+    for game in games:
+        date_str = datetime.datetime.fromtimestamp(
+            int(game.end_date)
+        ).strftime('%Y-%m-%d')
+
+        player_str = u','.join([
+                                   game.__getattribute__('player_{0}'.format(i)).first_name + u' '
+                                   + game.__getattribute__('player_{0}'.format(i)).last_name
+                                   for i in range(1, 5)])
+
+        btn_text = u'{0} - {1}'.format(date_str, player_str)
+
+        callback_data = json.dumps({'a': action, 'g': game.id})
+
+        inline_keyboard_buttons.append([
+            InlineKeyboardButton(text=btn_text, callback_data=callback_data)
+        ])
+
+    cancel_btn = InlineKeyboardButton(text=String.CANCEL, callback_data=json.dumps({'a': String.ACTION_CANCEL}))
+
+    inline_keyboard_buttons.append([cancel_btn])
+
+    if message:
+        bot.editMessageText(chat_id=message.chat_id,
+                            message_id=message.message_id,
+                            text=text,
+                            reply_markup=InlineKeyboardMarkup(inline_keyboard_buttons),
+                            disable_notification=disable_notification)
+    else:
+        bot.send_message(chat_id=chat_id,
+                         text=text,
+                         reply_markup=InlineKeyboardMarkup(inline_keyboard_buttons),
+                         disable_notification=disable_notification)

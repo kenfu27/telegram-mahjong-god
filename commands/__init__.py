@@ -40,6 +40,16 @@ class MJGCommands(object):
         return func_wrapper
 
 
+@MJGCommands.callback(String.ACTION_CANCEL)
+def cancel(bot, update):
+    """
+    :type bot: telegram.bot.Bot
+    :type update: telegram.update.Update
+    """
+    message = update.callback_query.message
+    bot.editMessageText(text=String.CANCEL_CONFIRM, chat_id=message.chat_id, message_id=message.message_id)
+
+
 @MJGCommands.callback(String.ACTION_EVENT_CANCEL)
 def event_cancel(bot, update):
     """

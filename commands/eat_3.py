@@ -152,6 +152,8 @@ def handle_eat_3_select_fan_callback(bot, update, index):
                                           message=update.callback_query.message,
                                           index=index + 1)
         else:
+            DB.update_event(session, event_id, {'completed': 1})
+
             # Create Transactions
             DB.create_transaction(session, event_id,
                                   from_id=update_dict['loser'],

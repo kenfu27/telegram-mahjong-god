@@ -44,6 +44,10 @@ class String(object):
     ACTION_3_EAT_SELECT_FAN_2 = '3_eat_fan_2'
     ACTION_3_EAT_SELECT_FAN_3 = '3_eat_fan_3'
     ACTION_ON_9_SELECT_TARGET = 'on9_target'
+    ACTION_END_GAME_CONFIRM = 'end_confirm'
+    ACTION_HISTORY_SELECT_GAME = 'history_game'
+    ACTION_HISTORY_LIST = 'history_list'
+    ACTION_CANCEL = 'cancel'
 
     # Fan
     FAN_10 = u'十番'
@@ -70,7 +74,6 @@ class String(object):
     # Game Status
     SAME_JONG_MESSAGE = u'冧莊！{set}風{round}局 *{jong_first} {jong_last}* 做莊'
     NEXT_JONG_MESSAGE = u'過莊！{set}風{round}局 *{jong_first} {jong_last}* 做莊'
-    END_GAME_MESSAGE = u'打撚完！'
 
     # Eat
     EAT_ASK_WINNER = u'邊個食糊？'
@@ -122,6 +125,15 @@ class String(object):
         u'戇鳩仔{loser_first} {loser_last}食詐糊！位位爆棚！'
     ]
 
+    # End Game
+    END_GAME_CONFIRM = u'係咪真係打完架？揾多個人禁打完'
+    END_GAME_MESSAGE = u'打撚完！'
+
+    # History
+    HISTORY_ASK_GAME = u'想睇邊局？'
+
     NO_ONE = u'冇人'
     CANCEL = u'禁錯 對唔撚住'
     CANCEL_CONFIRM = u'再禁錯打撚死你'
+    BEFORE = u'之前'
+    AFTER = u'之後'
