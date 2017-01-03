@@ -183,7 +183,9 @@ class DB(object):
             for transaction in event.transactions:
                 session.delete(transaction)
 
-        session.delete(event)
+
+
+        session.query(Event).filter(Event.id == event_id).delete()
         session.commit()
 
     # Transaction

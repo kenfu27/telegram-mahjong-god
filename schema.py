@@ -102,6 +102,7 @@ class EventType(object):
     EAT_2 = 'eat_2'
     EAT_3 = 'eat_3'
     SELF_TOUCH = 'self_touch'
+    WRAP_TOUCH = 'wrap_touch'
     DRAW = 'draw'
     ON_9 = 'on9'
     END = 'end'
@@ -135,3 +136,6 @@ class Transaction(Base):
     fan_no = Column(Integer)
     amount = Column(Integer)
     self_touch = Column(Integer, default=0)
+
+    # Relationship
+    events = relationship('Event')

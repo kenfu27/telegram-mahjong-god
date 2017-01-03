@@ -1,0 +1,9 @@
+<pre>
+總局數: {total_game}
+食糊:   {eat} / ${eat_amount} / {eat_rate} / ${average_eat_amount}
+出銃:   {lose} / ${lose_amount} / {lose_rate} / ${average_lose_amount}
+自摸:   {touch_win} / ${touch_win_amount} / {touch_win_rate} / ${average_touch_win_amount}
+輸自摸: {touch_lose} / ${touch_lose_amount} / {touch_lose_rate} / ${average_touch_lose_amount}
+包自摸: {wrap_touch}
+流局：  {draw} / {draw_rate}
+</pre>

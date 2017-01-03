@@ -66,7 +66,7 @@ def get_game_status(game_id):
     }
 
     totals = [0, 0, 0, 0]
-    for index, event in enumerate(game.events):
+    for index, event in enumerate(sorted(game.events, key=lambda e: e.id)):
         if event.type not in [EventType.END, EventType.DELETE]:
             results = [0, 0, 0, 0]
             for transaction in event.transactions:
@@ -110,6 +110,8 @@ def get_event_description(event):
         return u'三響 ({0}番，{1}番，{2}番)'.format(descriptions['fan_1'], descriptions['fan_2'], descriptions['fan_3'])
     elif event.type == EventType.SELF_TOUCH:
         return u'自摸{0}番'.format(descriptions['fan'])
+    elif event.type == EventType.WRAP_TOUCH:
+        return u'包自摸{0}番'.format(descriptions['fan'])
     elif event.type == EventType.DRAW:
         return u'流局'
     elif event.type == EventType.ON_9:

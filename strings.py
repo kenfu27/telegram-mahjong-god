@@ -34,6 +34,9 @@ class String(object):
     ACTION_EAT_SELECT_FAN = 'eat_fan'
     ACTION_SELF_TOUCH_SELECT_WINNER = 'self_touch_winner'
     ACTION_SELF_TOUCH_SELECT_FAN = 'self_touch_fan'
+    ACTION_WRAP_TOUCH_SELECT_WINNER = 'wrap_touch_winner'
+    ACTION_WRAP_TOUCH_SELECT_FAN = 'wrap_touch_fan'
+    ACTION_WRAP_TOUCH_SELECT_LOSER = 'wrap_touch_loser'
     ACTION_2_EAT_SELECT_WIN_1 = '2_eat_win_1'
     ACTION_2_EAT_SELECT_FAN_1 = '2_eat_fan_1'
     ACTION_2_EAT_SELECT_WIN_2 = '2_eat_win_2'
@@ -94,6 +97,14 @@ class String(object):
     SELF_TOUCH_MESSAGES = [
         u'{winner_first} {winner_last} 自摸{fan}番！ 位位{amount}蚊！',
         u'{winner_first} {winner_last} 又屎忽撞騰棍自摸{fan}番喇'
+    ]
+
+    # Wrap Touch
+    WRAP_TOUCH_ASK_WINNER = u'邊個仆街要人包自摸？'
+    WRAP_TOUCH_ASK_PRICE = u'自摸幾多番？'
+    WRAP_TOUCH_ASK_TARGET = u'邊個傻閪包自摸？'
+    WRAP_TOUCH_MESSAGES = [
+        u'{loser_first} {loser_last}包{winner_first} {winner_last}自摸{fan}番！'
     ]
 
     # 2 Eat
