@@ -46,6 +46,12 @@ def cancel(bot, update):
     :type bot: telegram.bot.Bot
     :type update: telegram.update.Update
     """
+    data = json.loads(update.callback_query.data)
+    event_id = data.get('event_id', None)
+
+    if event_id:
+        DB.delete_event(get_db_session(), event_id)
+
     message = update.callback_query.message
     bot.editMessageText(text=String.CANCEL_CONFIRM, chat_id=message.chat_id, message_id=message.message_id)
 

@@ -152,8 +152,23 @@ class DB(object):
         return event
 
     @staticmethod
-    def get_event(session, game_id=None, event_id=None):
+    def get_event(session, event_id=None):
         return session.query(Event).get(event_id)
+
+    @staticmethod
+    def get_events(session, game_id=None, event_id=None):
+        query = session.query(Event)
+
+        if game_id:
+            query = query.filter(Event.game_id == game_id)
+
+        if event_id:
+            if isinstance(event_id, (int, str, unicode)):
+                query = query.filter(Event.id == event_id)
+            elif isinstance(event_id, (set, list)):
+                query = query.filter(Event.id.in_(event_id))
+
+        return query.all()
 
     @staticmethod
     def update_event(session, event_id, update_dict):
@@ -162,7 +177,13 @@ class DB(object):
 
     @staticmethod
     def delete_event(session, event_id):
-        session.query(Event).filter(Event.id == event_id).delete()
+        event = session.query(Event).get(event_id)
+
+        if event:
+            for transaction in event.transactions:
+                session.delete(transaction)
+
+        session.delete(event)
         session.commit()
 
     # Transaction

@@ -6,7 +6,8 @@ from telegram import InlineKeyboardButton
 from telegram import InlineKeyboardMarkup
 
 from db import get_db_session, DB
-from schema import Game, PRICE_LIST
+from helpers.game import get_event_description
+from schema import Game, PRICE_LIST, EventType
 from strings import String
 
 
@@ -181,6 +182,8 @@ def send_game_select_keyboard(bot, chat_id, text, action, games, message=None, d
     :type text:
     :type action: str
     :type games: list[schema.Game]
+    :param message:
+    :param disable_notification:
     """
     inline_keyboard_buttons = []
 
@@ -217,3 +220,79 @@ def send_game_select_keyboard(bot, chat_id, text, action, games, message=None, d
                          text=text,
                          reply_markup=InlineKeyboardMarkup(inline_keyboard_buttons),
                          disable_notification=disable_notification)
+
+
+def send_event_select_keyboard(bot, chat_id, text, event_id, action, events, message=None):
+    """
+    :type bot: telegram.bot.Bot
+    :type chat_id: int
+    :type text:
+    :type event_id: int
+    :type action: str
+    :type events: list[schema.Event]
+    :type message: 
+    :return: 
+    """
+    inline_keyboard_buttons = []
+
+    for event in events:
+        if event.type not in [EventType.DELETE, EventType.END]:
+            btn_text = get_event_description(event)
+
+            callback_data = json.dumps({'a': action, 't': event.id, 'e': event_id})
+
+            inline_keyboard_buttons.append([
+                InlineKeyboardButton(text=btn_text, callback_data=callback_data)
+            ])
+
+    cancel_btn = InlineKeyboardButton(text=String.CANCEL,
+                                      callback_data=json.dumps({'a': String.ACTION_CANCEL, 'e': event_id}))
+
+    inline_keyboard_buttons.append([cancel_btn])
+
+    if message:
+        bot.editMessageText(chat_id=message.chat_id,
+                            message_id=message.message_id,
+                            text=text,
+                            reply_markup=InlineKeyboardMarkup(inline_keyboard_buttons))
+    else:
+        bot.send_message(chat_id=chat_id,
+                         text=text,
+                         reply_markup=InlineKeyboardMarkup(inline_keyboard_buttons))
+
+
+def send_wind_select_keyboard(bot, chat_id, text, event_id, action, message=None):
+    """
+    :type bot: telegram.bot.Bot
+    :type chat_id: int
+    :type text:
+    :type event_id: int
+    :type action: str
+    :type message:
+    :return:
+    """
+    inline_keyboard_buttons = []
+
+    for i in range(1, 5):
+        btn_text = String.__dict__.get('SEAT_{0}'.format(i))
+
+        callback_data = json.dumps({'a': action, 'e': event_id, 't': i})
+
+        inline_keyboard_buttons.append([
+            InlineKeyboardButton(text=btn_text, callback_data=callback_data)
+        ])
+
+    cancel_btn = InlineKeyboardButton(text=String.CANCEL,
+                                      callback_data=json.dumps({'a': String.ACTION_CANCEL, 'e': event_id}))
+
+    inline_keyboard_buttons.append([cancel_btn])
+
+    if message:
+        bot.editMessageText(chat_id=message.chat_id,
+                            message_id=message.message_id,
+                            text=text,
+                            reply_markup=InlineKeyboardMarkup(inline_keyboard_buttons))
+    else:
+        bot.send_message(chat_id=chat_id,
+                         text=text,
+                         reply_markup=InlineKeyboardMarkup(inline_keyboard_buttons))

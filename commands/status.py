@@ -24,3 +24,6 @@ def status(bot, update):
                          text=status_text,
                          parse_mode='HTML',
                          reply_to_message_id=message.message_id)
+    else:
+        with open('assets/eatshit.jpg', 'rb') as f:
+            update.message.reply_photo(photo=f, caption=String.ERROR_NO_GAME_EAT.encode('utf8'))

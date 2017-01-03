@@ -48,6 +48,9 @@ class String(object):
     ACTION_HISTORY_SELECT_GAME = 'history_game'
     ACTION_HISTORY_LIST = 'history_list'
     ACTION_CANCEL = 'cancel'
+    ACTION_DELETE_SELECT_EVENT = 'delete_event'
+    ACTION_DELETE_ASK_SET = 'delete_set'
+    ACTION_DELETE_ASK_ROUND = 'delete_round'
 
     # Fan
     FAN_10 = u'十番'
@@ -131,6 +134,12 @@ class String(object):
 
     # History
     HISTORY_ASK_GAME = u'想睇邊局？'
+
+    # Delete
+    DELETE_ASK_EVENT = u'要剷邊局？'
+    DELETE_ASK_SET = u'咁而家係乜風？'
+    DELETE_ASK_ROUND = u'咁而家係乜局？'
+    DELETE_CONFIRM = u'下次咪撚亂禁啦'
 
     NO_ONE = u'冇人'
     CANCEL = u'禁錯 對唔撚住'

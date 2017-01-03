@@ -105,6 +105,7 @@ class EventType(object):
     DRAW = 'draw'
     ON_9 = 'on9'
     END = 'end'
+    DELETE = 'delete'
 
 
 class Event(Timestamps, Base):
