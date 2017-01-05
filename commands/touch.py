@@ -23,7 +23,7 @@ def self_touch(bot, update):
     chat = message.chat
 
     if chat.type == Chat.PRIVATE:
-        bot.send_message(update.message.chat_id, String.ERROR_PRIVATE_CHAT)
+        bot.sendMessage(update.message.chat_id, String.ERROR_PRIVATE_CHAT, timeout=5)
     else:
         session = get_db_session()
 
@@ -43,6 +43,9 @@ def self_touch(bot, update):
                                         chat_id=game.chat_id,
                                         text=String.SELF_TOUCH_ASK_WINNER,
                                         reply_to_message_id=message.message_id)
+        else:
+            with open('assets/eatshit.jpg', 'rb') as f:
+                update.message.reply_photo(photo=f, caption=String.ERROR_NO_GAME_EAT.encode('utf8'))
 
 
 @MJGCommands.callback(String.ACTION_SELF_TOUCH_SELECT_WINNER)
@@ -111,7 +114,7 @@ def self_touch_fan(bot, update):
                                                                 winner_last=to_player.last_name,
                                                                 fan=fan, amount=amount)
         message = update.callback_query.message
-        bot.editMessageText(text=text,
+        bot.editMessageText(timeout=5, text=text,
                             chat_id=message.chat_id,
                             message_id=message.message_id)
 

@@ -6,7 +6,7 @@ from commands import MJGCommands
 from db import DB, get_db_session
 from helpers.game import get_game_status
 from helpers.inline_keyboard import send_game_select_keyboard
-from schema import Game
+from schema import Game, GameStatus
 from strings import String
 
 
@@ -46,6 +46,7 @@ def history_list(bot, update):
 
     games = DB.get_games(get_db_session(),
                          chat_id=message.chat_id,
+                         status=GameStatus.ENDED,
                          size=10,
                          game_before_id=game_before_id,
                          game_after_id=game_after_id,
@@ -74,7 +75,7 @@ def history_select_game(bot, update):
     game_status_str = get_game_status(game_id)
     message = update.callback_query.message
 
-    bot.editMessageText(text=game_status_str,
+    bot.editMessageText(timeout=5, text=game_status_str,
                         chat_id=message.chat_id,
                         message_id=message.message_id,
                         parse_mode='HTML')

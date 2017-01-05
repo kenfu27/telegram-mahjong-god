@@ -15,7 +15,9 @@ RUN apt-get install -y \
 # Python libraries
 RUN pip install \
     python-telegram-bot \
-    SQLAlchemy SQLAlchemy-Utils
+    SQLAlchemy SQLAlchemy-Utils \
+    tornado torndsession \
+    requests
 
 # MySQL
 RUN apt-key adv --keyserver pgp.mit.edu --recv-keys 5072E1F5

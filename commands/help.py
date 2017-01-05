@@ -15,4 +15,4 @@ def help(bot, update):
     with codecs.open('templates/help.html', 'r', 'utf-8') as f:
         html = f.read()
 
-    bot.send_message(update.message.chat_id, html, parse_mode='HTML')
+    bot.sendMessage(update.message.chat_id, html, parse_mode='HTML', timeout=5)

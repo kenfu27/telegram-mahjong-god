@@ -67,14 +67,14 @@ def get_game_status(game_id):
 
     totals = [0, 0, 0, 0]
     for index, event in enumerate(sorted(game.events, key=lambda e: e.id)):
-        if event.type not in [EventType.END, EventType.DELETE]:
+        if event.type not in [EventType.END, EventType.DELETE, EventType.NEW_GAME]:
             results = [0, 0, 0, 0]
             for transaction in event.transactions:
                 totals[seat_no_map[transaction.from_player_id]] -= int(transaction.amount)
                 totals[seat_no_map[transaction.to_player_id]] += int(transaction.amount)
                 results[seat_no_map[transaction.from_player_id]] -= int(transaction.amount)
                 results[seat_no_map[transaction.to_player_id]] += int(transaction.amount)
-            event_str += u'{0}. '.format(index + 1).rjust(3) + u''.join([str(amount).rjust(5) for amount in results]) + \
+            event_str += u'{0}. '.format(index).rjust(3) + u''.join([str(amount).rjust(5) for amount in results]) + \
                          u'  ' + get_event_description(event) + u'\n\r'
 
     with codecs.open('templates/game_status.html', 'r', 'utf-8') as f:
@@ -186,7 +186,7 @@ def advance_game_status(bot, game_id, winner=None):
             text = same_jong()
 
             # Send Message To Chat
-            bot.sendMessage(chat_id=game.chat_id, text=text, parse_mode='Markdown')
+            bot.sendMessage(chat_id=game.chat_id, text=text, parse_mode='Markdown', timeout=5)
         elif game.set_no == 4 and game.round_no == 4:
             # End Game
             end_game(bot, game.id)
@@ -195,13 +195,13 @@ def advance_game_status(bot, game_id, winner=None):
             text = next_jong()
 
             # Send Message To Chat
-            bot.sendMessage(chat_id=game.chat_id, text=text, parse_mode='Markdown')
+            bot.sendMessage(chat_id=game.chat_id, text=text, parse_mode='Markdown', timeout=5)
     else:
         # Next Jong
         text = next_jong()
 
         # Send Message To Chat
-        bot.sendMessage(chat_id=game.chat_id, text=text, parse_mode='Markdown')
+        bot.sendMessage(chat_id=game.chat_id, text=text, parse_mode='Markdown', timeout=5)
 
 
 def end_game(bot, game_id, message=None):
@@ -223,11 +223,13 @@ def end_game(bot, game_id, message=None):
     # TODO: Display Results
 
     if message:
-        bot.editMessageText(text=String.END_GAME_MESSAGE, chat_id=message.chat_id, message_id=message.message_id)
+        bot.editMessageText(text=String.END_GAME_MESSAGE, chat_id=message.chat_id,
+                            message_id=message.message_id, timeout=5)
     else:
-        bot.sendMessage(chat_id=game.chat_id, text=String.END_GAME_MESSAGE)
+        bot.sendMessage(chat_id=game.chat_id, text=String.END_GAME_MESSAGE, timeout=5)
 
     # Send Result
-    bot.send_message(chat_id=game.chat_id,
-                     text=get_game_status(game.id),
-                     parse_mode='HTML')
+    bot.sendMessage(chat_id=game.chat_id,
+                    text=get_game_status(game.id),
+                    parse_mode='HTML',
+                    timeout=5)

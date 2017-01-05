@@ -22,7 +22,7 @@ def end(bot, update):
     chat = message.chat
 
     if chat.type == Chat.PRIVATE:
-        bot.send_message(update.message.chat_id, String.ERROR_PRIVATE_CHAT)
+        bot.sendMessage(update.message.chat_id, String.ERROR_PRIVATE_CHAT, timeout=5)
     else:
         session = get_db_session()
 
@@ -43,10 +43,11 @@ def end(bot, update):
                 [InlineKeyboardButton(text=btn_text, callback_data=callback_data)]
             ]
 
-            bot.send_message(chat_id=game.chat_id,
-                             text=String.END_GAME_CONFIRM,
-                             reply_to_message_id=message.message_id,
-                             reply_markup=InlineKeyboardMarkup(inline_keyboard_buttons))
+            bot.sendMessage(chat_id=game.chat_id,
+                            text=String.END_GAME_CONFIRM,
+                            reply_to_message_id=message.message_id,
+                            reply_markup=InlineKeyboardMarkup(inline_keyboard_buttons),
+                            timeout=5)
 
 
 @MJGCommands.callback(String.ACTION_END_GAME_CONFIRM)

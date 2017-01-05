@@ -79,7 +79,7 @@ def get_player_stats(username):
     for game in games:
         for event in game.events:
             description = json.loads(event.description)
-            if event.type not in [EventType.END, EventType.DELETE]:
+            if event.type not in [EventType.END, EventType.DELETE, EventType.NEW_GAME]:
                 total_rounds += 1
                 if event.type == EventType.DRAW:
                     draw += 1

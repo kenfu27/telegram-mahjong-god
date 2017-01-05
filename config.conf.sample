@@ -1,2 +1,8 @@
 [MJG]
 BOT_TOKEN=
+DB_CONNECTION_STRING=
+
+[Metabase]
+HOST=http://localhost:3000
+EMAIL=
+PASSWORD=

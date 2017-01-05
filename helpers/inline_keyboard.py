@@ -45,7 +45,7 @@ def send_seat_select_keyboard(bot, game_id, text, parse_mode=None, message=None,
 
     if message:
         # Update Existing Keyboard
-        bot.editMessageText(text=text,
+        bot.editMessageText(timeout=5, text=text,
                             chat_id=message.chat_id,
                             message_id=message.message_id,
                             parse_mode=parse_mode,
@@ -53,11 +53,12 @@ def send_seat_select_keyboard(bot, game_id, text, parse_mode=None, message=None,
                             disable_notification=disable_notification)
     else:
         # Send New Keyboard
-        bot.send_message(text=text,
-                         chat_id=game.chat_id,
-                         parse_mode=parse_mode,
-                         reply_markup=InlineKeyboardMarkup(inline_keyboard_buttons),
-                         disable_notification=disable_notification)
+        bot.sendMessage(text=text,
+                        chat_id=game.chat_id,
+                        parse_mode=parse_mode,
+                        reply_markup=InlineKeyboardMarkup(inline_keyboard_buttons),
+                        disable_notification=disable_notification,
+                        timeout=5)
 
 
 def send_player_select_keyboard(bot, game_id, event_id, action, chat_id, text, parse_mode=None, exclude_id=None,
@@ -108,7 +109,7 @@ def send_player_select_keyboard(bot, game_id, event_id, action, chat_id, text, p
 
     if message:
         # Update Existing Keyboard
-        bot.editMessageText(text=text,
+        bot.editMessageText(timeout=5, text=text,
                             chat_id=message.chat_id,
                             message_id=message.message_id,
                             parse_mode=parse_mode,
@@ -117,12 +118,13 @@ def send_player_select_keyboard(bot, game_id, event_id, action, chat_id, text, p
                             disable_notification=disable_notification)
     else:
         # Send New Keyboard
-        bot.send_message(chat_id=chat_id,
-                         text=text,
-                         parse_mode=parse_mode,
-                         reply_to_message_id=reply_to_message_id,
-                         reply_markup=InlineKeyboardMarkup(inline_keyboard_buttons),
-                         disable_notification=disable_notification)
+        bot.sendMessage(chat_id=chat_id,
+                        text=text,
+                        parse_mode=parse_mode,
+                        reply_to_message_id=reply_to_message_id,
+                        reply_markup=InlineKeyboardMarkup(inline_keyboard_buttons),
+                        disable_notification=disable_notification,
+                        timeout=5)
 
 
 def send_fan_select_keyboard(bot, game_id, event_id, action, chat_id, text, parse_mode=None, message=None,
@@ -161,18 +163,19 @@ def send_fan_select_keyboard(bot, game_id, event_id, action, chat_id, text, pars
 
     if message:
         # Update Existing Keyboard
-        bot.editMessageText(text=text,
+        bot.editMessageText(timeout=5, text=text,
                             chat_id=message.chat_id,
                             message_id=message.message_id,
                             reply_markup=InlineKeyboardMarkup(inline_keyboard_buttons),
                             disable_notification=disable_notification)
     else:
         # Send New Keyboard
-        bot.send_message(chat_id=chat_id,
-                         text=text,
-                         parse_mode=parse_mode,
-                         reply_markup=InlineKeyboardMarkup(inline_keyboard_buttons),
-                         disable_notification=disable_notification)
+        bot.sendMessage(chat_id=chat_id,
+                        text=text,
+                        parse_mode=parse_mode,
+                        reply_markup=InlineKeyboardMarkup(inline_keyboard_buttons),
+                        disable_notification=disable_notification,
+                        timeout=5)
 
 
 def send_game_select_keyboard(bot, chat_id, text, action, games, message=None, disable_notification=False):
@@ -210,16 +213,17 @@ def send_game_select_keyboard(bot, chat_id, text, action, games, message=None, d
     inline_keyboard_buttons.append([cancel_btn])
 
     if message:
-        bot.editMessageText(chat_id=message.chat_id,
+        bot.editMessageText(timeout=5, chat_id=message.chat_id,
                             message_id=message.message_id,
                             text=text,
                             reply_markup=InlineKeyboardMarkup(inline_keyboard_buttons),
                             disable_notification=disable_notification)
     else:
-        bot.send_message(chat_id=chat_id,
-                         text=text,
-                         reply_markup=InlineKeyboardMarkup(inline_keyboard_buttons),
-                         disable_notification=disable_notification)
+        bot.sendMessage(chat_id=chat_id,
+                        text=text,
+                        reply_markup=InlineKeyboardMarkup(inline_keyboard_buttons),
+                        disable_notification=disable_notification,
+                        timeout=5)
 
 
 def send_event_select_keyboard(bot, chat_id, text, event_id, action, events, message=None):
@@ -236,7 +240,7 @@ def send_event_select_keyboard(bot, chat_id, text, event_id, action, events, mes
     inline_keyboard_buttons = []
 
     for event in events:
-        if event.type not in [EventType.DELETE, EventType.END]:
+        if event.type not in [EventType.DELETE, EventType.END, EventType.NEW_GAME]:
             btn_text = get_event_description(event)
 
             callback_data = json.dumps({'a': action, 't': event.id, 'e': event_id})
@@ -251,14 +255,15 @@ def send_event_select_keyboard(bot, chat_id, text, event_id, action, events, mes
     inline_keyboard_buttons.append([cancel_btn])
 
     if message:
-        bot.editMessageText(chat_id=message.chat_id,
+        bot.editMessageText(timeout=5, chat_id=message.chat_id,
                             message_id=message.message_id,
                             text=text,
                             reply_markup=InlineKeyboardMarkup(inline_keyboard_buttons))
     else:
-        bot.send_message(chat_id=chat_id,
-                         text=text,
-                         reply_markup=InlineKeyboardMarkup(inline_keyboard_buttons))
+        bot.sendMessage(chat_id=chat_id,
+                        text=text,
+                        reply_markup=InlineKeyboardMarkup(inline_keyboard_buttons),
+                        timeout=5)
 
 
 def send_wind_select_keyboard(bot, chat_id, text, event_id, action, message=None):
@@ -288,11 +293,12 @@ def send_wind_select_keyboard(bot, chat_id, text, event_id, action, message=None
     inline_keyboard_buttons.append([cancel_btn])
 
     if message:
-        bot.editMessageText(chat_id=message.chat_id,
+        bot.editMessageText(timeout=5, chat_id=message.chat_id,
                             message_id=message.message_id,
                             text=text,
                             reply_markup=InlineKeyboardMarkup(inline_keyboard_buttons))
     else:
-        bot.send_message(chat_id=chat_id,
-                         text=text,
-                         reply_markup=InlineKeyboardMarkup(inline_keyboard_buttons))
+        bot.sendMessage(chat_id=chat_id,
+                        text=text,
+                        reply_markup=InlineKeyboardMarkup(inline_keyboard_buttons),
+                        timeout=5)

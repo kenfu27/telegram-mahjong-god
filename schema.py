@@ -64,7 +64,6 @@ class Player(Base):
     username = Column(String(64), primary_key=True)
     first_name = Column(UnicodeText)
     last_name = Column(UnicodeText)
-    chat_id = Column(Integer)
 
 
 class GameStatus(object):
@@ -98,6 +97,7 @@ class Game(Timestamps, Base):
 
 
 class EventType(object):
+    NEW_GAME = 'new_game'
     EAT = 'eat'
     EAT_2 = 'eat_2'
     EAT_3 = 'eat_3'

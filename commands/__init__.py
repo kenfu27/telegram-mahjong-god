@@ -53,7 +53,7 @@ def cancel(bot, update):
         DB.delete_event(get_db_session(), event_id)
 
     message = update.callback_query.message
-    bot.editMessageText(text=String.CANCEL_CONFIRM, chat_id=message.chat_id, message_id=message.message_id)
+    bot.editMessageText(timeout=5, text=String.CANCEL_CONFIRM, chat_id=message.chat_id, message_id=message.message_id)
 
 
 @MJGCommands.callback(String.ACTION_EVENT_CANCEL)
@@ -74,7 +74,7 @@ def event_cancel(bot, update):
         DB.delete_event(session, event_id)
         text = u'{0} {1}: {2}'.format(user.first_name, user.last_name, String.CANCEL)
         message = update.callback_query.message
-        bot.editMessageText(text=text, chat_id=message.chat_id, message_id=message.message_id)
+        bot.editMessageText(timeout=5, text=text, chat_id=message.chat_id, message_id=message.message_id)
 
 
 __all__ = []

@@ -1,11 +1,27 @@
+#!/usr/bin/env python
+
 import ConfigParser
 import json
 import logging
 
+import sys
 from telegram.ext import CallbackQueryHandler
 from telegram.ext import Updater, CommandHandler
 
 from commands import MJGCommands
+
+
+def setup_stdout_logger(log_level=logging.DEBUG):
+    # Root Logger
+    root_logger = logging.getLogger()
+    root_logger.setLevel(log_level)
+
+    # stdout
+    stdout_stream_handler = logging.StreamHandler(sys.stdout)
+    stdout_stream_handler.setLevel(log_level)
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(filename)s - %(lineno)d - %(levelname)s - %(message)s')
+    stdout_stream_handler.setFormatter(formatter)
+    root_logger.addHandler(stdout_stream_handler)
 
 
 # Error Handler
@@ -26,6 +42,8 @@ def callback_handler(bot, update):
 
 
 if __name__ == "__main__":
+    setup_stdout_logger()
+
     logging.basicConfig(level=logging.DEBUG,
                         format='%(asctime)s - %(name)s - %(filename)s - %(lineno)d - %(levelname)s - %(message)s')
 
@@ -45,4 +63,10 @@ if __name__ == "__main__":
     updater.dispatcher.add_handler(CallbackQueryHandler(callback_handler))
 
     updater.start_polling()
+
+    # try:
+    #     MJGApplication(modules=[StatsWebModule]).start()
+    # except (KeyboardInterrupt, SystemExit):
+    #     updater.stop()
+
     updater.idle()

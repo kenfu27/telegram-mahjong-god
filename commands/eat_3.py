@@ -193,7 +193,7 @@ def handle_eat_3_select_fan_callback(bot, update, index):
             )
 
             message = update.callback_query.message
-            bot.editMessageText(text=text,
+            bot.editMessageText(timeout=5, text=text,
                                 chat_id=message.chat_id,
                                 message_id=message.message_id)
 

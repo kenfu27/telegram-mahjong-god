@@ -20,7 +20,7 @@ def draw(bot, update):
     chat = update.message.chat
 
     if chat.type == Chat.PRIVATE:
-        bot.send_message(update.message.chat_id, String.ERROR_PRIVATE_CHAT)
+        bot.sendMessage(update.message.chat_id, String.ERROR_PRIVATE_CHAT, timeout=5)
     else:
         session = get_db_session()
 
@@ -35,7 +35,7 @@ def draw(bot, update):
                             completed=1)
 
             # Send Message to Chat Room
-            bot.send_message(chat_id=game.chat_id, text=random.choice(String.DRAW_MESSAGES))
+            bot.sendMessage(chat_id=game.chat_id, text=random.choice(String.DRAW_MESSAGES), timeout=5)
 
             advance_game_status(bot, game_id=game.id)
         else:

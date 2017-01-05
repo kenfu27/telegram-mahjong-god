@@ -9,7 +9,7 @@ from commands import MJGCommands
 from db import get_db_session, DB
 from helpers.game import get_player_seat_no, get_game_player_no
 from helpers.inline_keyboard import send_seat_select_keyboard
-from schema import GameStatus
+from schema import GameStatus, EventType
 from strings import String
 
 
@@ -22,7 +22,7 @@ def new_game(bot, update):
     chat = update.message.chat
 
     if chat.type == Chat.PRIVATE:
-        bot.send_message(update.message.chat_id, String.ERROR_PRIVATE_CHAT)
+        bot.sendMessage(update.message.chat_id, String.ERROR_PRIVATE_CHAT, timeout=5)
     else:
         user = update.message.from_user
         session = get_db_session()
@@ -33,25 +33,33 @@ def new_game(bot, update):
             existing_game = DB.get_player_current_game(session, user)
 
             if existing_game:
-                bot.send_message(chat_id=update.message.chat_id,
-                                 text=String.ERROR_EXISTING_GAME.format(user.first_name, user.last_name),
-                                 reply_to_message_id=update.message.message_id)
+                bot.sendMessage(chat_id=update.message.chat_id,
+                                text=String.ERROR_EXISTING_GAME.format(user.first_name, user.last_name),
+                                reply_to_message_id=update.message.message_id,
+                                timeout=5)
             else:
                 game = DB.create_game(session, chat_id=chat.id, player_1_id=user.username)
 
+                event = DB.create_event(session,
+                                        game_id=game.id,
+                                        message_id=update.message.message_id,
+                                        type=EventType.NEW_GAME,
+                                        created_by=user.username)
+
                 inline_keyboard_buttons = [
                     InlineKeyboardButton(String.PRICE_8f64, callback_data=json.dumps(
-                        {'a': String.ACTION_ASK_PRICE, 'g': int(game.id), 'p': '8f64'})),
+                        {'a': String.ACTION_ASK_PRICE, 'g': int(game.id), 'p': '8f64', 'e': event.id})),
                     InlineKeyboardButton(String.PRICE_8f128, callback_data=json.dumps(
-                        {'a': String.ACTION_ASK_PRICE, 'g': int(game.id), 'p': '8f128'})),
+                        {'a': String.ACTION_ASK_PRICE, 'g': int(game.id), 'p': '8f128', 'e': event.id})),
                     InlineKeyboardButton(String.PRICE_10f128, callback_data=json.dumps(
-                        {'a': String.ACTION_ASK_PRICE, 'g': int(game.id), 'p': '10f128'})),
+                        {'a': String.ACTION_ASK_PRICE, 'g': int(game.id), 'p': '10f128', 'e': event.id})),
                     InlineKeyboardButton(String.PRICE_10f256, callback_data=json.dumps(
-                        {'a': String.ACTION_ASK_PRICE, 'g': int(game.id), 'p': '10f256'}))
+                        {'a': String.ACTION_ASK_PRICE, 'g': int(game.id), 'p': '10f256', 'e': event.id}))
                 ]
 
-                bot.send_message(chat_id=player.chat_id, text=String.START_GAME_ASK_PRICE,
-                                 reply_markup=InlineKeyboardMarkup([inline_keyboard_buttons]))
+                bot.sendMessage(chat_id=game.chat_id, text=String.START_GAME_ASK_PRICE,
+                                reply_markup=InlineKeyboardMarkup([inline_keyboard_buttons]),
+                                timeout=5)
         else:
             update.message.reply_text(String.ERROR_NOT_REGISTERED)
 
@@ -62,19 +70,25 @@ def ask_price_callback(bot, update):
     :type bot: telegram.bot.Bot
     :type update: telegram.update.Update
     """
-    session = get_db_session()
+    current_user = update.callback_query.from_user
     data = json.loads(update.callback_query.data)
-    game_id = data['g']
-    price = data['p']
-    DB.update_game(session, game_id=game_id, update_dict={'price': price, 'status': GameStatus.WAITING_FOR_PLAYER})
-    bot.editMessageText(text=String.__dict__.get('PRICE_' + price),
-                        chat_id=update.callback_query.message.chat_id,
-                        message_id=update.callback_query.message.message_id)
+    session = get_db_session()
+    event_id = data['e']
+    event = DB.get_event(session, event_id=event_id)
 
-    with codecs.open('templates/wait_for_players.html', 'r', 'utf-8') as f:
-        html = f.read().format(String.__dict__.get('PRICE_' + price), String.START_GAME_SELECT_SEAT)
+    if event and not event.completed and current_user.username == event.created_by:
+        price = data['p']
+        DB.update_game(session,
+                       game_id=event.game_id,
+                       update_dict={'price': price, 'status': GameStatus.WAITING_FOR_PLAYER})
+        bot.editMessageText(timeout=5, text=String.__dict__.get('PRICE_' + price),
+                            chat_id=update.callback_query.message.chat_id,
+                            message_id=update.callback_query.message.message_id)
 
-    send_seat_select_keyboard(bot, game_id=game_id, text=html, parse_mode='HTML')
+        with codecs.open('templates/wait_for_players.html', 'r', 'utf-8') as f:
+            html = f.read().format(String.__dict__.get('PRICE_' + price), String.START_GAME_SELECT_SEAT)
+
+        send_seat_select_keyboard(bot, game_id=event.game_id, text=html, parse_mode='HTML')
 
 
 @MJGCommands.callback(String.ACTION_SELECT_SEAT)
@@ -152,11 +166,15 @@ def start_game(bot, update):
 
             with codecs.open('templates/game_start.html', 'r', 'utf-8') as f:
                 html = f.read()
+
+            bot.editMessageText(timeout=5, text=html, chat_id=game.chat_id,
+                                message_id=update.callback_query.message.message_id,
+                                parse_mode='HTML', reply_markup=None)
         else:
             extra_msg = String.ERROR_NOT_ENOUGH_PLAYER
 
             with codecs.open('templates/wait_for_players.html', 'r', 'utf-8') as f:
                 html = f.read().format(String.__dict__.get('PRICE_' + game.price), extra_msg)
 
-        bot.editMessageText(text=html, chat_id=game.chat_id, message_id=update.callback_query.message.message_id,
-                            parse_mode='HTML', reply_markup=None)
+            send_seat_select_keyboard(bot, game_id=game.id, text=html, parse_mode='HTML',
+                                      message=update.callback_query.message)

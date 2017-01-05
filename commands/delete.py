@@ -20,7 +20,7 @@ def delete(bot, update):
     chat = message.chat
 
     if chat.type == Chat.PRIVATE:
-        bot.send_message(update.message.chat_id, String.ERROR_PRIVATE_CHAT)
+        bot.sendMessage(update.message.chat_id, String.ERROR_PRIVATE_CHAT, timeout=5)
     else:
         session = get_db_session()
 
@@ -134,6 +134,7 @@ def delete_round(bot, update):
 
         # Update Message
         message = update.callback_query.message
-        bot.editMessageText(text=String.DELETE_CONFIRM,
+        bot.editMessageText(timeout=5, text=String.DELETE_CONFIRM,
                             chat_id=message.chat_id,
-                            message_id=message.message_id)
+                            message_id=message.message_id
+                            )

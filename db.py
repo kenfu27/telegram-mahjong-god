@@ -1,3 +1,5 @@
+import ConfigParser
+
 from sqlalchemy import create_engine
 from sqlalchemy import or_
 from sqlalchemy.orm import sessionmaker
@@ -5,7 +7,10 @@ from sqlalchemy.orm import sessionmaker
 from schema import Player, Game, Base, GameStatus, Event, Transaction
 
 # Prepare Schema
-engine = create_engine('mysql+mysqldb://root:root@localhost/mahjong', pool_recycle=3600, convert_unicode=True,
+config = ConfigParser.RawConfigParser()
+config.read("config.conf")
+
+engine = create_engine(config.get('MJG', 'DB_CONNECTION_STRING'), pool_recycle=3600, convert_unicode=True,
                        pool_size=40, echo=False)
 
 Base.metadata.create_all(engine)
@@ -21,14 +26,13 @@ def get_db_session():
 class DB(object):
     # Players
     @staticmethod
-    def try_register_player(session, user, chat):
+    def try_register_player(session, user):
         """
         :type session:
         :type user: telegram.user.User
-        :type chat: telegram.chat.Chat
         :rtype: bool
         """
-        player = Player(username=user.username, first_name=user.first_name, last_name=user.last_name, chat_id=chat.id)
+        player = Player(username=user.username, first_name=user.first_name, last_name=user.last_name)
 
         session.merge(player)
 
@@ -110,7 +114,7 @@ class DB(object):
         return query.get(game_id)
 
     @staticmethod
-    def get_games(session, chat_id, size=10, game_before_id=None, game_after_id=None, options=None):
+    def get_games(session, chat_id, status=None, size=10, game_before_id=None, game_after_id=None, options=None):
         """
         :type session:
         :type chat_id: int
@@ -124,6 +128,9 @@ class DB(object):
 
         if options:
             query = query.options(options)
+
+        if status:
+            query = query.filter(Game.status == status)
 
         if game_before_id:
             return query.filter(Game.id < game_before_id).order_by(Game.id.desc()).limit(size).all()
@@ -182,8 +189,6 @@ class DB(object):
         if event:
             for transaction in event.transactions:
                 session.delete(transaction)
-
-
 
         session.query(Event).filter(Event.id == event_id).delete()
         session.commit()

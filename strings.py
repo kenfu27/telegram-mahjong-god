@@ -7,7 +7,7 @@ class String(object):
     REGISTER_FAIL = u'你咪已經註左冊囉戇鳩仔'
 
     # Error
-    ERROR_NOT_REGISTERED = u'你邊撚個啊 我唔撚識你啊\n\r同我開個單人房打 /start 先返黎啦'
+    ERROR_NOT_REGISTERED = u'你邊撚個啊 我唔撚識你啊\n\r打 /start 先啦'
     ERROR_PRIVATE_CHAT = u'單人房開乜撚野枱啊死毒撚'
     ERROR_EXISTING_GAME = u'{0} {1} 一個人點打兩枱啊 你估你係李騰啊'
     ERROR_NO_GAME = u'打空氣啊你 一係打 /join 一係返屋企打飛機啦'
