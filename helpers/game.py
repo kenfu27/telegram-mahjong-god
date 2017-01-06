@@ -74,8 +74,8 @@ def get_game_status(game_id):
                 totals[seat_no_map[transaction.to_player_id]] += int(transaction.amount)
                 results[seat_no_map[transaction.from_player_id]] -= int(transaction.amount)
                 results[seat_no_map[transaction.to_player_id]] += int(transaction.amount)
-            event_str += u'{0}. '.format(index).rjust(3) + u''.join([str(amount).rjust(5) for amount in results]) + \
-                         u'  ' + get_event_description(event) + u'\n\r'
+            event_str += u'{0}. '.format(index).rjust(4) + u''.join([str(amount).rjust(5) for amount in results]) + \
+                         u'   ' + get_event_description(event) + u'\n\r'
 
     with codecs.open('templates/game_status.html', 'r', 'utf-8') as f:
         html = f.read().format(

@@ -17,9 +17,21 @@ def stats(bot, update):
 
     stats = get_player_stats(user.username)
 
+    fans = ''
+
+    for i in range(3, 11):
+        numbers = [
+            stats.win_fan_map.get(i, 0),
+            stats.lose_fan_map.get(i, 0),
+            stats.touch_win_fan_map.get(i, 0),
+            stats.touch_lose_fan_map.get(i, 0)
+        ]
+        fans += '{0}'.format(i).rjust(4) + '/' + '/'.join(['{0}'.format(n).rjust(4) for n in numbers]) + '\n\r'
+
     with codecs.open('templates/stats', 'r', 'utf-8') as f:
         html = f.read().format(
             total_game=str(stats.total_games).rjust(5),
+            total_balance=str(stats.total_balance).rjust(5),
             eat=str(stats.eat).rjust(5),
             eat_amount=str(stats.eat_amount).rjust(5),
             eat_rate="{0:.4f}".format(float(stats.eat) / float(stats.total_games)),
@@ -42,7 +54,8 @@ def stats(bot, update):
                 float(stats.touch_lose_amount) / float(stats.touch_lose)).rjust(6) if stats.touch_lose else '0',
             wrap_touch=str(stats.wrap_touch).rjust(5),
             draw=str(stats.draw).rjust(5),
-            draw_rate="{0:.4f}".format(float(stats.draw) / float(stats.total_games)).rjust(5)
+            draw_rate="{0:.4f}".format(float(stats.draw) / float(stats.total_games)).rjust(5),
+            fans=fans
         )
 
     bot.sendMessage(chat_id=update.message.chat_id,

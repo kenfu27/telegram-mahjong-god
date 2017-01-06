@@ -8,10 +8,11 @@ from schema import Game, GameStatus, Event, EventType
 
 
 class MJGStats(object):
-    def __init__(self, total_rounds, eat, eat_amount, draw, lose, lose_amount, touch_win, touch_win_amount, touch_lose,
-                 touch_lose_amount, wrap_touch, eat_2, eat_3, win_map, win_fan_map, lose_map, lose_fan_map,
-                 touch_win_map, touch_win_fan_map, touch_lose_map, touch_lose_fan_map):
+    def __init__(self, total_rounds, total_balance, eat, eat_amount, draw, lose, lose_amount, touch_win,
+                 touch_win_amount, touch_lose, touch_lose_amount, wrap_touch, eat_2, eat_3, win_map, win_fan_map,
+                 lose_map, lose_fan_map, touch_win_map, touch_win_fan_map, touch_lose_map, touch_lose_fan_map):
         self.total_games = total_rounds
+        self.total_balance = total_balance
         self.eat = eat
         self.eat_amount = eat_amount
         self.draw = draw
@@ -49,6 +50,7 @@ def get_player_stats(username):
         Game.status == GameStatus.ENDED).options([joinedload(Game.events, Event.transactions)]).all()
 
     total_rounds = 0
+    total_balance = 0
     eat = 0
     eat_amount = 0
     draw = 0
@@ -88,6 +90,7 @@ def get_player_stats(username):
                         if transaction.from_player_id == username:
                             # LOSE
                             lose += 1
+                            total_balance -= transaction.amount
                             lose_amount += transaction.amount
                             update_map(lose_map, transaction.to_player_id, transaction.amount)
                             update_map(lose_fan_map, description['fan'], 1)
@@ -100,6 +103,7 @@ def get_player_stats(username):
                         elif transaction.to_player_id == username:
                             # WIN
                             eat += 1
+                            total_balance += transaction.amount
                             eat_amount += transaction.amount
                             update_map(win_map, transaction.from_player_id, transaction.amount)
                             update_map(win_fan_map, description['fan'], 1)
@@ -108,6 +112,7 @@ def get_player_stats(username):
                         if transaction.from_player_id == username:
                             # LOSE
                             touch_lose += 1
+                            total_balance -= transaction.amount
                             touch_lose_amount += transaction.amount
                             update_map(touch_lose_map, transaction.to_player_id, transaction.amount)
                             update_map(touch_lose_fan_map, description['fan'], 1)
@@ -117,6 +122,7 @@ def get_player_stats(username):
                         elif transaction.to_player_id == username:
                             # WIN
                             touch_win += 1
+                            total_balance += transaction.amount
                             touch_win_amount += transaction.amount
                             update_map(touch_win_map, transaction.to_player_id, transaction.amount)
                             update_map(touch_win_fan_map, description['fan'], 1)
@@ -126,7 +132,7 @@ def get_player_stats(username):
         touch_win_fan_map[fan] /= 3
 
     return MJGStats(
-        total_rounds, eat, eat_amount, draw, lose, lose_amount, touch_win, touch_win_amount, touch_lose,
+        total_rounds, total_balance, eat, eat_amount, draw, lose, lose_amount, touch_win, touch_win_amount, touch_lose,
         touch_lose_amount, wrap_touch, eat_2, eat_3, win_map, win_fan_map, lose_map, lose_fan_map, touch_win_map,
         touch_win_fan_map, touch_lose_map, touch_lose_fan_map
     )
