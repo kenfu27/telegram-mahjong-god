@@ -77,6 +77,7 @@ def send_player_select_keyboard(bot, game_id, event_id, action, chat_id, text, p
     :type exclude_id: str | unicode | set | list
     :type reply_to_message_id: int
     :type message: telegram.message.Message
+    :type disable_notification: bool
     """
 
     if not exclude_id:

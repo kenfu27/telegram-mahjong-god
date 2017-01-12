@@ -1,10 +1,11 @@
 import json
 
+from sqlalchemy import func
 from sqlalchemy import or_
 from sqlalchemy.orm import joinedload
 
-from db import get_db_session
-from schema import Game, GameStatus, Event, EventType
+from db import get_db_session, DB
+from schema import Game, GameStatus, Event, EventType, Transaction
 
 
 class MJGStats(object):
@@ -136,3 +137,29 @@ def get_player_stats(username):
         touch_lose_amount, wrap_touch, eat_2, eat_3, win_map, win_fan_map, lose_map, lose_fan_map, touch_win_map,
         touch_win_fan_map, touch_lose_map, touch_lose_fan_map
     )
+
+
+def get_player_ranks():
+    session = get_db_session()
+
+    losings = session.query(func.sum(Transaction.amount), Transaction.from_player_id).group_by(
+        Transaction.from_player_id).all()
+    winnings = session.query(func.sum(Transaction.amount), Transaction.to_player_id).group_by(
+        Transaction.to_player_id).all()
+
+    balance_map = {}
+
+    for amount, user_id in losings:
+        if user_id not in balance_map:
+            balance_map[user_id] = 0
+        balance_map[user_id] -= int(amount)
+
+    for amount, user_id in winnings:
+        if user_id not in balance_map:
+            balance_map[user_id] = 0
+        balance_map[user_id] += int(amount)
+
+    return sorted(
+        [{'user_id': user_id, 'amount': amount, 'player': DB.get_player(session, username=user_id)} for user_id, amount
+         in balance_map.iteritems()],
+        key=lambda record: record['amount'], reverse=True)
