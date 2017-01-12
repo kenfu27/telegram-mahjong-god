@@ -93,7 +93,7 @@ def get_player_stats(username):
                             total_balance -= transaction.amount
                             lose_amount += transaction.amount
                             update_map(lose_map, transaction.to_player_id, transaction.amount)
-                            update_map(lose_fan_map, description['fan'], 1)
+                            update_map(lose_fan_map, transaction.fan_no, 1)
 
                             if event.type == EventType.EAT_2:
                                 eat_2 += 1
@@ -106,7 +106,7 @@ def get_player_stats(username):
                             total_balance += transaction.amount
                             eat_amount += transaction.amount
                             update_map(win_map, transaction.from_player_id, transaction.amount)
-                            update_map(win_fan_map, description['fan'], 1)
+                            update_map(win_fan_map, transaction.fan_no, 1)
                 elif event.type in [EventType.SELF_TOUCH, EventType.WRAP_TOUCH]:
                     for transaction in event.transactions:
                         if transaction.from_player_id == username:
