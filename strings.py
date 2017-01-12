@@ -12,7 +12,7 @@ class String(object):
     ERROR_EXISTING_GAME = u'{0} {1} 一個人點打兩枱啊 你估你係李騰啊'
     ERROR_NO_GAME = u'打空氣啊你 一係打 /join 一係返屋企打飛機啦'
     ERROR_LEAVE_NO_GAME = u'走乜撚野姐走 未坐低就嗌走'
-    ERROR_SAME_SEAT = u'係咪玩野啊 {0} {1} 我知你坐嗰個位啦 再禁我J都斬撚斷你'
+    ERROR_SAME_SEAT = u'{0} {1} 淆底起身'
     ERROR_SEAT_TAKEN = u'{0} {1} 你咁鐘意坐大脾 俾支騰棍你坐'
     ERROR_NOT_ENOUGH_PLAYER = u'唔夠人點開波啊戇鳩仔'
     ERROR_NO_GAME_EAT = u'食屎啦你 唔係打緊就死撚開啦'
@@ -24,10 +24,15 @@ class String(object):
     START_GAME_CHOSE_SEAT = u'{0} {1} 坐左落{2}位'
     START_GAME_CHANGE_SEAT = u'{0} {1} 數都唔識數 坐{2}位走去禁{3}位'
 
+    # Cancel Game
+    CANCEL_GAME = u'收皮'
+    CANCEL_GAME_MESSAGE = u'冇人打！收皮！'
+
     # Actions
     ACTION_ASK_PRICE = 'ask_price'
     ACTION_SELECT_SEAT = 'select_seat'
     ACTION_START_GAME = 'start_game'
+    ACTION_CANCEL_GAME = 'cancel_game'
     ACTION_EVENT_CANCEL = 'event_cancel'
     ACTION_EAT_SELECT_WINNER = 'eat_winner'
     ACTION_EAT_SELECT_LOSER = 'eat_loser'

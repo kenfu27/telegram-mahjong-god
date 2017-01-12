@@ -115,6 +115,8 @@ def select_seat_callback(bot, update):
             elif seated_player:
                 if seated_player == user.username:
                     # Player already sitting at that seat
+                    update_dict = {'player_{0}_id'.format(existing_seat_no): None}
+                    DB.update_game(session, game.id, update_dict)
                     extra_msg = String.ERROR_SAME_SEAT.format(user.first_name, user.last_name)
                 else:
                     # Seat has already been taken by other player
@@ -178,3 +180,23 @@ def start_game(bot, update):
 
             send_seat_select_keyboard(bot, game_id=game.id, text=html, parse_mode='HTML',
                                       message=update.callback_query.message)
+
+
+@MJGCommands.callback(String.ACTION_CANCEL_GAME)
+def cancel_game(bot, update):
+    """
+    :type bot: telegram.bot.Bot
+    :type update: telegram.update.Update
+    """
+    current_user = update.callback_query.from_user
+    data = json.loads(update.callback_query.data)
+    session = get_db_session()
+    game_id = data['g']
+
+    game = DB.get_game(session, game_id=game_id)
+
+    if game and game.status == GameStatus.WAITING_FOR_PLAYER and get_player_seat_no(current_user, game):
+        DB.delete_game(session, game_id=game_id)
+
+        bot.editMessageText(text=String.CANCEL_GAME_MESSAGE, chat_id=update.callback_query.message.chat_id,
+                            message_id=update.callback_query.message.message_id)

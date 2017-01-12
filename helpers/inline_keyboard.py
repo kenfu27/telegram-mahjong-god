@@ -43,6 +43,9 @@ def send_seat_select_keyboard(bot, game_id, text, parse_mode=None, message=None,
     inline_keyboard_buttons.append([InlineKeyboardButton(String.START_GAME, callback_data=json.dumps(
         {'a': String.ACTION_START_GAME, 'g': int(game.id)}))])
 
+    inline_keyboard_buttons.append([InlineKeyboardButton(String.CANCEL_GAME, callback_data=json.dumps(
+        {'a': String.ACTION_CANCEL_GAME, 'g': int(game.id)}))])
+
     if message:
         # Update Existing Keyboard
         bot.editMessageText(timeout=5, text=text,

@@ -144,6 +144,12 @@ class DB(object):
         session.query(Game).filter(Game.id == game_id).update(update_dict)
         session.commit()
 
+    @staticmethod
+    def delete_game(session, game_id):
+        game = session.query(Game).get(game_id)
+        session.delete(game)
+        session.commit()
+
     # Event
     @staticmethod
     def create_event(session, game_id, message_id, type, created_by, description='{}', completed=0):
