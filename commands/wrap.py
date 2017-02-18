@@ -126,7 +126,7 @@ def eat_fan(bot, update):
 
     if event and not event.completed and current_user.username == event.created_by:
         fan = data['f']
-        amount = PRICE_LIST.get(event.game.price).get(int(fan))
+        amount = PRICE_LIST.get(event.game.price).get(int(fan)) * 1.5
 
         update_dict = json.loads(event.description)
         update_dict['fan'] = int(fan)
@@ -136,7 +136,7 @@ def eat_fan(bot, update):
 
         # Create Transaction
         DB.create_transaction(session, event_id=event_id, from_id=update_dict['loser'], to_id=update_dict['winner'],
-                              fan_no=update_dict['fan'], amount=amount)
+                              fan_no=update_dict['fan'], amount=amount, self_touch=1)
 
         # Send Message to Group
         from_player = DB.get_player(session, update_dict['loser'])

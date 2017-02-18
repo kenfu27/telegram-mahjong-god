@@ -189,7 +189,13 @@ def advance_game_status(bot, game_id, winner=None):
             bot.sendMessage(chat_id=game.chat_id, text=text, parse_mode='Markdown', timeout=5)
         elif game.set_no == 4 and game.round_no == 4:
             # End Game
-            end_game(bot, game.id)
+            # end_game(bot, game.id)
+            status_text = get_game_status(game.id)
+
+            bot.sendMessage(chat_id=game.chat_id,
+                            text=status_text,
+                            parse_mode='HTML',
+                            timeout=5)
         else:
             # Next Jong
             text = next_jong()

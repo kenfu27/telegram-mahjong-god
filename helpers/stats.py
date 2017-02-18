@@ -5,7 +5,7 @@ from sqlalchemy import or_
 from sqlalchemy.orm import joinedload
 
 from db import get_db_session, DB
-from schema import Game, GameStatus, Event, EventType, Transaction
+from schema import Game, GameStatus, Event, EventType, Transaction, Player
 
 
 class MJGStats(object):
@@ -163,3 +163,37 @@ def get_player_ranks():
         [{'user_id': user_id, 'amount': amount, 'player': DB.get_player(session, username=user_id)} for user_id, amount
          in balance_map.iteritems()],
         key=lambda record: record['amount'], reverse=True)
+
+
+def get_player_vs(username):
+    session = get_db_session()
+
+    players = set()
+
+    winnings = [{'username': record[0], 'amount': int(record[1])} for record in
+                session.query(Transaction.from_player_id, func.sum(Transaction.amount)).filter(
+                    Transaction.to_player_id == username).group_by(Transaction.from_player_id).all()]
+    winnings.sort(key=lambda r: r['amount'], reverse=True)
+
+    losings = [{'username': record[0], 'amount': int(record[1])} for record in
+               session.query(Transaction.to_player_id, func.sum(Transaction.amount)).filter(
+                   Transaction.from_player_id == username).group_by(Transaction.to_player_id).all()]
+    losings.sort(key=lambda r: r['amount'], reverse=True)
+
+    totals = {}
+    for w in winnings:
+        players.add(w['username'])
+        if w['username'] not in totals:
+            totals[w['username']] = 0
+        totals[w['username']] += w['amount']
+    for l in losings:
+        players.add(l['username'])
+        if l['username'] not in totals:
+            totals[l['username']] = 0
+        totals[l['username']] -= l['amount']
+    totals = [{'username': u, 'amount': a} for u, a in totals.iteritems()]
+    totals.sort(key=lambda r: r['amount'], reverse=True)
+
+    players = {p.username: p for p in session.query(Player).filter(Player.username.in_(players)).all()}
+
+    return winnings, losings, totals, players

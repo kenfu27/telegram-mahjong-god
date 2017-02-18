@@ -40,7 +40,9 @@ def end(bot, update):
             callback_data = json.dumps({'a': String.ACTION_END_GAME_CONFIRM, 'e': event.id})
 
             inline_keyboard_buttons = [
-                [InlineKeyboardButton(text=btn_text, callback_data=callback_data)]
+                [InlineKeyboardButton(text=btn_text, callback_data=callback_data)],
+                [InlineKeyboardButton(text=String.CANCEL,
+                                      callback_data=json.dumps({'a': String.ACTION_EVENT_CANCEL, 'e': int(event.id)}))]
             ]
 
             bot.sendMessage(chat_id=game.chat_id,
