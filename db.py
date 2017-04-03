@@ -1,10 +1,11 @@
 import ConfigParser
 
 from sqlalchemy import create_engine
+from sqlalchemy import func
 from sqlalchemy import or_
 from sqlalchemy.orm import sessionmaker
 
-from schema import Player, Game, Base, GameStatus, Event, Transaction
+from schema import Player, Game, Base, GameStatus, Event, Transaction, Season
 
 # Prepare Schema
 config = ConfigParser.RawConfigParser()
@@ -56,6 +57,15 @@ class DB(object):
         """
         return bool(DB.get_player(session, user.username))
 
+    # Season
+    @staticmethod
+    def get_chat_current_season_no(session, chat_id):
+        return session.query(func.max(Season.season_no)).filter(Season.chat_id == chat_id).scalar()
+
+    @staticmethod
+    def get_chat_current_season(session, chat_id):
+        return session.query(Season).filter(Season.end_date == None).first()
+
     # Game
     @staticmethod
     def get_open_game(session, chat_id):
@@ -88,12 +98,13 @@ class DB(object):
         return query.first()
 
     @staticmethod
-    def create_game(session, chat_id, player_1_id=None, player_2_id=None, player_3_id=None, player_4_id=None):
+    def create_game(session, season_no, chat_id, player_1_id=None, player_2_id=None, player_3_id=None,
+                    player_4_id=None):
         """
         :rtype: schema.Game
         """
-        game = Game(chat_id=chat_id, player_1_id=player_1_id, player_2_id=player_2_id, player_3_id=player_3_id,
-                    player_4_id=player_4_id)
+        game = Game(season_no=season_no, chat_id=chat_id, player_1_id=player_1_id, player_2_id=player_2_id,
+                    player_3_id=player_3_id, player_4_id=player_4_id)
         session.add(game)
         session.commit()
         return game

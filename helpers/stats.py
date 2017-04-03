@@ -5,6 +5,7 @@ from sqlalchemy import or_
 from sqlalchemy.orm import joinedload
 
 from db import get_db_session, DB
+from helpers.game import get_player_seat_no
 from schema import Game, GameStatus, Event, EventType, Transaction, Player
 
 
@@ -36,19 +37,29 @@ class MJGStats(object):
         self.touch_lose_fan_map = touch_lose_fan_map
 
 
-def get_player_stats(username):
+def get_player_stats(username, season_no=None, chat_id=None):
     """
     :type username: str | unicode
+    :type season_no: int
+    :type chat_id: int
     :rtype: MJGStats
     """
     session = get_db_session()
 
-    games = session.query(Game).filter(
+    query = session.query(Game).filter(
         or_(Game.player_1_id == username,
             Game.player_2_id == username,
             Game.player_3_id == username,
             Game.player_4_id == username),
-        Game.status == GameStatus.ENDED).options([joinedload(Game.events, Event.transactions)]).all()
+        Game.status == GameStatus.ENDED).options([joinedload(Game.events, Event.transactions)])
+
+    if season_no:
+        query = query.filter(Game.season_no == season_no)
+
+    if chat_id:
+        query = query.filter(Game.chat_id == chat_id)
+
+    games = query.all()
 
     total_rounds = 0
     total_balance = 0
@@ -139,25 +150,46 @@ def get_player_stats(username):
     )
 
 
-def get_player_ranks():
+def get_player_ranks(season_no=None, chat_id=None):
     session = get_db_session()
 
-    losings = session.query(func.sum(Transaction.amount), Transaction.from_player_id).group_by(
-        Transaction.from_player_id).all()
-    winnings = session.query(func.sum(Transaction.amount), Transaction.to_player_id).group_by(
-        Transaction.to_player_id).all()
+    query = session.query(Game)
+
+    if season_no:
+        query = query.filter(Game.season_no == season_no)
+
+    if chat_id:
+        query = query.filter(Game.chat_id == chat_id)
+
+    games = query.options(joinedload(Game.events).joinedload(Event.transactions)).all()
 
     balance_map = {}
 
-    for amount, user_id in losings:
-        if user_id not in balance_map:
-            balance_map[user_id] = 0
-        balance_map[user_id] -= int(amount)
+    for game in games:
+        for event in game.events:
+            for transaction in event.transactions:
+                if transaction.from_player_id not in balance_map:
+                    balance_map[transaction.from_player_id] = 0
+                balance_map[transaction.from_player_id] -= transaction.amount
+                if transaction.to_player_id not in balance_map:
+                    balance_map[transaction.to_player_id] = 0
+                balance_map[transaction.to_player_id] += transaction.amount
 
-    for amount, user_id in winnings:
-        if user_id not in balance_map:
-            balance_map[user_id] = 0
-        balance_map[user_id] += int(amount)
+    # losings = session.query(func.sum(Transaction.amount), Transaction.from_player_id).group_by(
+    #     Transaction.from_player_id).all()
+    # winnings = session.query(func.sum(Transaction.amount), Transaction.to_player_id).group_by(
+    #     Transaction.to_player_id).all()
+    #
+    #
+    # for amount, user_id in losings:
+    #     if user_id not in balance_map:
+    #         balance_map[user_id] = 0
+    #     balance_map[user_id] -= int(amount)
+    #
+    # for amount, user_id in winnings:
+    #     if user_id not in balance_map:
+    #         balance_map[user_id] = 0
+    #     balance_map[user_id] += int(amount)
 
     return sorted(
         [{'user_id': user_id, 'amount': amount, 'player': DB.get_player(session, username=user_id)} for user_id, amount
@@ -165,20 +197,51 @@ def get_player_ranks():
         key=lambda record: record['amount'], reverse=True)
 
 
-def get_player_vs(username):
+def get_player_vs(username, season_no=None, chat_id=None):
     session = get_db_session()
 
     players = set()
 
-    winnings = [{'username': record[0], 'amount': int(record[1])} for record in
-                session.query(Transaction.from_player_id, func.sum(Transaction.amount)).filter(
-                    Transaction.to_player_id == username).group_by(Transaction.from_player_id).all()]
-    winnings.sort(key=lambda r: r['amount'], reverse=True)
+    query = session.query(Game)
 
-    losings = [{'username': record[0], 'amount': int(record[1])} for record in
-               session.query(Transaction.to_player_id, func.sum(Transaction.amount)).filter(
-                   Transaction.from_player_id == username).group_by(Transaction.to_player_id).all()]
+    if season_no:
+        query = query.filter(Game.season_no == season_no)
+
+    if chat_id:
+        query = query.filter(Game.chat_id == chat_id)
+
+    games = query.options(joinedload(Game.events).joinedload(Event.transactions)).all()
+
+    winnings = {}
+    losings = {}
+
+    for game in games:
+        if get_player_seat_no(user=username, game=game) != 0:
+            for event in game.events:
+                for transaction in event.transactions:
+                    if transaction.to_player_id == username:  # Win
+                        if transaction.from_player_id not in winnings:
+                            winnings[transaction.from_player_id] = 0
+                        winnings[transaction.from_player_id] += transaction.amount
+                    elif transaction.from_player_id == username:  # Lose
+                        if transaction.to_player_id not in losings:
+                            losings[transaction.to_player_id] = 0
+                        losings[transaction.to_player_id] += transaction.amount
+
+    winnings = [{'username': key, 'amount': value} for key, value in winnings.iteritems()]
+    winnings.sort(key=lambda r: r['amount'], reverse=True)
+    losings = [{'username': key, 'amount': value} for key, value in losings.iteritems()]
     losings.sort(key=lambda r: r['amount'], reverse=True)
+
+    # winnings = [{'username': record[0], 'amount': int(record[1])} for record in
+    #             session.query(Transaction.from_player_id, func.sum(Transaction.amount)).filter(
+    #                 Transaction.to_player_id == username).group_by(Transaction.from_player_id).all()]
+    # winnings.sort(key=lambda r: r['amount'], reverse=True)
+    #
+    # losings = [{'username': record[0], 'amount': int(record[1])} for record in
+    #            session.query(Transaction.to_player_id, func.sum(Transaction.amount)).filter(
+    #                Transaction.from_player_id == username).group_by(Transaction.to_player_id).all()]
+    # losings.sort(key=lambda r: r['amount'], reverse=True)
 
     totals = {}
     for w in winnings:

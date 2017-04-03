@@ -27,6 +27,8 @@ def new_game(bot, update):
         user = update.message.from_user
         session = get_db_session()
 
+        season_no = DB.get_chat_current_season_no(session, chat_id=chat.id)
+
         if DB.is_user_registered(session, user):
             player = DB.get_player(session, user.username)
 
@@ -38,7 +40,7 @@ def new_game(bot, update):
                                 reply_to_message_id=update.message.message_id,
                                 timeout=5)
             else:
-                game = DB.create_game(session, chat_id=chat.id, player_1_id=user.username)
+                game = DB.create_game(session, season_no=season_no, chat_id=chat.id, player_1_id=user.username)
 
                 event = DB.create_event(session,
                                         game_id=game.id,

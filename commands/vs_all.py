@@ -1,11 +1,10 @@
 # coding=utf-8
 from commands import MJGCommands
-from helpers.season import get_chat_current_season
 from helpers.stats import get_player_vs
 
 
-@MJGCommands.command('vs')
-def vs(bot, update):
+@MJGCommands.command('vs_all')
+def vs_all(bot, update):
     """
     :type bot: telegram.bot.Bot
     :type update: telegram.update.Update
@@ -13,10 +12,7 @@ def vs(bot, update):
     user = update.message.from_user
     chat = update.message.chat
 
-    current_season = get_chat_current_season(chat_id=chat.id)
-
-    winnings, losings, totals, players = get_player_vs(user.username, season_no=current_season.season_no,
-                                                       chat_id=current_season.chat_id)
+    winnings, losings, totals, players = get_player_vs(user.username, chat_id=chat.id)
 
     html = u'<pre>'
 

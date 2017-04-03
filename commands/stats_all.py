@@ -3,11 +3,10 @@ import codecs
 from telegram.ext.dispatcher import run_async
 
 from commands import MJGCommands
-from helpers.season import get_chat_current_season_no
 from helpers.stats import get_player_stats
 
 
-@MJGCommands.command('stats')
+@MJGCommands.command('stats_all')
 @run_async
 def stats(bot, update):
     """
@@ -17,9 +16,7 @@ def stats(bot, update):
     user = update.message.from_user
     chat = update.message.chat
 
-    current_season_no = get_chat_current_season_no(chat_id=chat.id)
-
-    stats = get_player_stats(user.username, season_no=current_season_no, chat_id=chat.id)
+    stats = get_player_stats(user.username, chat_id=chat.id)
 
     fans = ''
 
@@ -38,33 +35,27 @@ def stats(bot, update):
             total_balance=str(stats.total_balance).rjust(5),
             eat=str(stats.eat).rjust(5),
             eat_amount=str(stats.eat_amount).rjust(5),
-            eat_rate="{0:.4f}".format(float(stats.eat) / float(stats.total_games)) if stats.total_games else '0'.rjust(
-                5),
+            eat_rate="{0:.4f}".format(float(stats.eat) / float(stats.total_games)),
             average_eat_amount="{0:.1f}".format(float(stats.eat_amount) / float(stats.eat)).rjust(
-                6) if stats.eat else '0'.rjust(5),
+                6) if stats.eat else '0',
             lose=str(stats.lose).rjust(5),
             lose_amount=str(stats.lose_amount).rjust(5),
-            lose_rate="{0:.4f}".format(
-                float(stats.lose) / float(stats.total_games)) if stats.total_games else '0'.rjust(5),
+            lose_rate="{0:.4f}".format(float(stats.lose) / float(stats.total_games)),
             average_lose_amount="{0:.1f}".format(float(stats.lose_amount) / float(stats.lose)).rjust(
-                6) if stats.lose else '0'.rjust(5),
+                6) if stats.lose else '0',
             touch_win=str(stats.touch_win).rjust(5),
             touch_win_amount=str(stats.touch_win_amount).rjust(5),
-            touch_win_rate="{0:.4f}".format(
-                float(stats.touch_win) / float(stats.total_games)) if stats.total_games else '0'.rjust(5),
+            touch_win_rate="{0:.4f}".format(float(stats.touch_win) / float(stats.total_games)),
             average_touch_win_amount="{0:.1f}".format(
-                float(stats.touch_win_amount) / float(stats.touch_win)).rjust(6) if stats.touch_win else '0'.rjust(5),
+                float(stats.touch_win_amount) / float(stats.touch_win)).rjust(6) if stats.touch_win else '0',
             touch_lose=str(stats.touch_lose).rjust(5),
             touch_lose_amount=str(stats.touch_lose_amount).rjust(5),
-            touch_lose_rate="{0:.4f}".format(
-                float(stats.touch_lose) / float(stats.total_games)) if stats.total_games else '0'.rjust(5),
+            touch_lose_rate="{0:.4f}".format(float(stats.touch_lose) / float(stats.total_games)),
             average_touch_lose_amount="{0:.1f}".format(
-                float(stats.touch_lose_amount) / float(stats.touch_lose)).rjust(6) if stats.touch_lose else '0'.rjust(
-                5),
+                float(stats.touch_lose_amount) / float(stats.touch_lose)).rjust(6) if stats.touch_lose else '0',
             wrap_touch=str(stats.wrap_touch).rjust(5),
             draw=str(stats.draw).rjust(5),
-            draw_rate="{0:.4f}".format(float(stats.draw) / float(stats.total_games)).rjust(
-                5) if stats.total_games else '0'.rjust(5),
+            draw_rate="{0:.4f}".format(float(stats.draw) / float(stats.total_games)).rjust(5),
             fans=fans
         )
 
